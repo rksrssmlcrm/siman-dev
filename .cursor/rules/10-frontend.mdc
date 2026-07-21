@@ -1,0 +1,45 @@
+---
+description: Принципы frontend-инжиниринга и дизайна для Next.js-лендинга
+globs: ["frontend/**", "*.tsx"]
+alwaysApply: false
+---
+
+# Frontend
+
+При работе над UI применяй skill `frontend-design` (anthropics/skills), при работе с состоянием — `frontend-state-management` (aj-geddes/useful-ai-prompts); также следуй `web-design-guidelines`, `vercel-react-best-practices` и `vercel-composition-patterns` (vercel-labs/agent-skills), если они установлены.
+
+## Компоненты
+
+- Server Components по умолчанию; `"use client"` — только для интерактивности и как можно ниже по дереву (выделяй интерактивный островок в отдельный компонент, а не помечай всю секцию).
+- Композиция (children, слоты) вместо пропс-дрилинга.
+- Все данные и тексты — в `frontend/lib/content.ts`, не хардкодить строки в JSX.
+
+## Состояние
+
+- Для лендинга достаточно локального `useState` и URL (searchParams). Не изобретать Redux там, где хватает `useState`.
+- Глобальный стор (Zustand v5) — только если состояние реально разделяют независимые ветки дерева.
+- Серверные данные — Server Components или TanStack Query v5.
+
+## Формы
+
+- react-hook-form + zod (`@hookform/resolvers`).
+- Одна zod-схема используется и для клиентской валидации, и (позже) как контракт с API.
+
+## Доступность (WCAG 2.1 AA)
+
+- Семантическая разметка (`header`, `nav`, `main`, `section` с заголовками), `label` у полей, `alt` у изображений.
+- `focus-visible`-стили, контраст текста ≥ 4.5:1, анимации уважают `prefers-reduced-motion`.
+
+## Ресурсы
+
+- Изображения только через `next/image`, шрифты только через `next/font`. Никаких `<img>` и CDN-шрифтов в `<head>`.
+
+## Дизайн-система
+
+- Цвета, радиусы, отступы, шрифты — только из токенов `@theme` в `frontend/app/globals.css`.
+- Никаких «магических» hex-значений и произвольных `[]`-значений в компонентах — при необходимости добавляй токен.
+
+## Производительность
+
+- Без лишних клиентских библиотек; тяжёлые интерактивные блоки — через `next/dynamic`.
+- Целевой Lighthouse Performance ≥ 90.
