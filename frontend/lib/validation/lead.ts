@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 /**
  * Contract for POST /api/leads (see docs/ARCHITECTURE.md, section 3).
- * The same shape is validated by Pydantic on the FastAPI side —
+ * Keep in sync with backend/app/schemas/lead.py (LeadCreateRequest) —
  * change both together.
  */
 export const leadPayloadSchema = z.object({
