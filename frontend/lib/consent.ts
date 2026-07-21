@@ -25,25 +25,41 @@ export function serializeConsentCookie(prefs: ConsentPrefs): string {
   return encodeURIComponent(JSON.stringify(prefs))
 }
 
-export function readConsentCookie(): ConsentPrefs | null {
+/** Cached snapshot so useSyncExternalStore does not see a new object every read. */
+let cachedRaw: string | null | undefined
+let cachedPrefs: ConsentPrefs | null = null
+
+function readRawConsentCookie(): string | null {
   if (typeof document === 'undefined') return null
   const match = document.cookie
     .split('; ')
     .find((row) => row.startsWith(`${CONSENT_COOKIE_NAME}=`))
   if (!match) return null
-  return parseConsentCookie(match.slice(CONSENT_COOKIE_NAME.length + 1))
+  return match.slice(CONSENT_COOKIE_NAME.length + 1)
 }
 
+export function readConsentCookie(): ConsentPrefs | null {
+  const raw = readRawConsentCookie()
+  if (raw === cachedRaw) return cachedPrefs
+  cachedRaw = raw
+  cachedPrefs = raw ? parseConsentCookie(raw) : null
+  return cachedPrefs
+}
+
+/** Invalidate cache after writing the cookie (same raw string would otherwise stale). */
 export function writeConsentCookie(prefs: ConsentPrefs): void {
   const secure = typeof window !== 'undefined' && window.location.protocol === 'https:'
+  const serialized = serializeConsentCookie(prefs)
   const parts = [
-    `${CONSENT_COOKIE_NAME}=${serializeConsentCookie(prefs)}`,
+    `${CONSENT_COOKIE_NAME}=${serialized}`,
     `Max-Age=${CONSENT_MAX_AGE}`,
     'Path=/',
     'SameSite=Lax',
   ]
   if (secure) parts.push('Secure')
   document.cookie = parts.join('; ')
+  cachedRaw = serialized
+  cachedPrefs = prefs
 }
 
 export function createConsentPrefs(analytics: boolean): ConsentPrefs {

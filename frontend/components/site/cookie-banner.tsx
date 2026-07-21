@@ -78,23 +78,23 @@ export function CookieBanner({
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={onSaveConfigure} className="rounded-full">
+              <Button type="button" onClick={onSaveConfigure} className="rounded-full">
                 {COOKIE_BANNER.saveSettings}
               </Button>
-              <Button variant="outline" onClick={onClose} className="rounded-full">
+              <Button type="button" variant="outline" onClick={onClose} className="rounded-full">
                 {COOKIE_BANNER.cancel}
               </Button>
             </div>
           </div>
         ) : (
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            <Button onClick={onAcceptAll} className="rounded-full">
+            <Button type="button" onClick={onAcceptAll} className="rounded-full">
               {COOKIE_BANNER.acceptAll}
             </Button>
-            <Button variant="outline" onClick={onNecessaryOnly} className="rounded-full">
+            <Button type="button" variant="outline" onClick={onNecessaryOnly} className="rounded-full">
               {COOKIE_BANNER.necessaryOnly}
             </Button>
-            <Button variant="ghost" onClick={onOpenConfigure} className="rounded-full">
+            <Button type="button" variant="ghost" onClick={onOpenConfigure} className="rounded-full">
               {COOKIE_BANNER.configure}
             </Button>
           </div>
