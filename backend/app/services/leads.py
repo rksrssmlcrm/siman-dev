@@ -59,6 +59,8 @@ def build_notification_text(lead: Lead, project_name: str) -> str:
 
 
 async def send_lead_notifications(settings: Settings, lead: Lead) -> None:
+    if not settings.lead_notifications:
+        return
     if lead.status == LeadStatus.SPAM.value:
         return
 

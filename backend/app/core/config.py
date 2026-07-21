@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     enable_admin: bool = Field(default=False, alias="ENABLE_ADMIN")
 
     project_name: str = Field(default="SimanDev", alias="PROJECT_NAME")
+    lead_notifications: bool = Field(default=True, alias="LEAD_NOTIFICATIONS")
 
     @field_validator("cors_origins")
     @classmethod
@@ -45,6 +46,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_notification_channels(self) -> "Settings":
+        if not self.lead_notifications:
+            return self
         telegram_ok = bool(self.telegram_bot_token and self.telegram_chat_id)
         smtp_ok = bool(self.smtp_host and self.smtp_user and self.smtp_password)
         if not telegram_ok and not smtp_ok:
