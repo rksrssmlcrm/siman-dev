@@ -1,0 +1,23 @@
+# Local override — HTTP on :8080, no TLS (prod-build smoke test).
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
+
+services:
+  caddy:
+    ports:
+      - "8080:80"
+    volumes:
+      - ./Caddyfile.local:/etc/caddy/Caddyfile:ro
+    environment:
+      STAGING_DOMAIN: localhost
+
+  frontend:
+    build:
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:8080}
+        NEXT_PUBLIC_METRIKA_ID: ${NEXT_PUBLIC_METRIKA_ID:-}
+
+  db:
+    # Expose Postgres on host for debugging (optional, not for production)
+    ports:
+      - "5432:5432"

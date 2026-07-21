@@ -11,6 +11,7 @@ import type { NextConfig } from 'next'
 // so all /api/* traffic flows through this rewrite when API_INTERNAL_URL is set.
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   async rewrites() {
     const apiUrl = process.env.API_INTERNAL_URL
     if (!apiUrl) return []

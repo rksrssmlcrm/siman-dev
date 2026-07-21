@@ -1,0 +1,34 @@
+# SimanDev — production Caddy config
+# Environment variables (from deploy/.env):
+#   STAGING_DOMAIN  — public domain, e.g. simandev.ru
+#   ACME_EMAIL      — email for Let's Encrypt certificate notifications
+
+{
+	email {$ACME_EMAIL}
+}
+
+{$STAGING_DOMAIN} {
+	encode gzip zstd
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "DENY"
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' mc.yandex.ru mc.yandex.com; connect-src 'self' mc.yandex.ru; img-src 'self' data: mc.yandex.ru; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'"
+		-Server
+	}
+
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+
+	handle /_next/static/* {
+		header Cache-Control "public, max-age=31536000, immutable"
+		reverse_proxy frontend:3000
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+}
