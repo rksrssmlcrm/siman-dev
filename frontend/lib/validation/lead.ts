@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { LEGAL } from '@/lib/legal'
 
 /**
  * Contract for POST /api/leads (see docs/ARCHITECTURE.md, section 3).
@@ -18,9 +19,10 @@ export const leadPayloadSchema = z.object({
   consent: z.literal(true, {
     message: 'Необходимо согласие на обработку данных',
   }),
-  // Honeypot — humans never fill it. Deliberately unconstrained here: a filled
-  // value must NOT fail validation (bots would learn about the trap from 422);
-  // the handler silently drops such requests instead.
+  consent_text_version: z
+    .string()
+    .min(1)
+    .max(32),
   honeypot: z.string().optional(),
 })
 
@@ -73,6 +75,7 @@ export function toLeadPayload(values: LeadFormValues): LeadPayload {
     phone: `+${values.phone.replace(/\D/g, '')}`,
     message: values.message?.trim() || undefined,
     consent: values.consent,
+    consent_text_version: LEGAL.consentTextVersion,
     honeypot: values.honeypot ?? '',
   }
 }

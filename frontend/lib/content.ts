@@ -407,8 +407,33 @@ export const FOOTER = {
   navTitle: 'Разделы',
   navAria: 'Навигация в подвале',
   contactsTitle: 'Контакты',
+  legalLine: `${CONTACTS.brand} — оператор персональных данных. ${CONTACTS.email}`,
   rights: 'Все права защищены.',
-  privacyLink: 'Политика конфиденциальности',
+  privacyLink: 'Политика обработки ПДн',
+  cookieSettings: 'Настройки cookie',
+  cookiesLink: 'Cookie',
+} as const
+
+export const COOKIE_BANNER = {
+  title: 'Мы используем cookie',
+  description:
+    'Необходимые cookie обеспечивают работу сайта. Аналитические cookie (Яндекс.Метрика) помогают понять, как пользователи взаимодействуют с сайтом — только с вашего согласия.',
+  detailsLink: 'Подробнее о cookie',
+  acceptAll: 'Принять все',
+  necessaryOnly: 'Только необходимые',
+  configure: 'Настроить',
+  saveSettings: 'Сохранить настройки',
+  cancel: 'Отмена',
+  categories: {
+    necessary: {
+      title: 'Необходимые',
+      description: 'Запоминают ваш выбор cookie. Всегда включены.',
+    },
+    analytics: {
+      title: 'Аналитика',
+      description: 'Яндекс.Метрика — обезличенная статистика посещений.',
+    },
+  },
 } as const
 
 export const CONTACT_CHANNELS = {
@@ -430,7 +455,7 @@ export const FORM = {
   },
   consent: {
     prefix: 'Я согласен(-на) на обработку персональных данных и принимаю',
-    linkLabel: 'политику конфиденциальности',
+    linkLabel: 'политику обработки персональных данных',
   },
   submit: 'Отправить заявку',
   submitting: 'Отправляем…',

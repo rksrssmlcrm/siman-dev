@@ -51,6 +51,7 @@ async function submitLead(values: LeadFormValues): Promise<{
 
 export function LeadForm() {
   const [status, setStatus] = useState<Status>('idle')
+  const [consentChecked, setConsentChecked] = useState(false)
 
   const {
     register,
@@ -64,6 +65,11 @@ export function LeadForm() {
     defaultValues: { name: '', phone: '', message: '', honeypot: '' },
   })
 
+  const resetForm = () => {
+    reset()
+    setConsentChecked(false)
+  }
+
   const onSubmit = async (values: LeadFormValues) => {
     if (status === 'loading') return
     setStatus('loading')
@@ -72,7 +78,7 @@ export function LeadForm() {
 
     if (ok) {
       setStatus('success')
-      reset()
+      resetForm()
       trackGoal('lead_submit')
       return
     }
@@ -220,7 +226,11 @@ export function LeadForm() {
                 id="lead-consent"
                 className="mt-0.5"
                 checked={field.value ?? false}
-                onCheckedChange={(checked) => field.onChange(checked === true)}
+                onCheckedChange={(checked) => {
+                  const value = checked === true
+                  field.onChange(value)
+                  setConsentChecked(value)
+                }}
                 aria-invalid={!!errors.consent}
                 aria-describedby={errors.consent ? 'lead-consent-error' : undefined}
               />
@@ -272,8 +282,8 @@ export function LeadForm() {
       <Button
         type="submit"
         size="lg"
-        disabled={status === 'loading'}
-        className="brand-gradient h-12 rounded-full text-base font-semibold text-white hover:opacity-90"
+        disabled={status === 'loading' || !consentChecked}
+        className="brand-gradient h-12 rounded-full text-base font-semibold text-white hover:opacity-90 disabled:opacity-50"
       >
         {status === 'loading' ? (
           <>

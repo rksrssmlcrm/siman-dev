@@ -73,6 +73,7 @@ def valid_payload() -> dict:
         "phone": "+79991234567",
         "message": "Нужен лендинг",
         "consent": True,
+        "consent_text_version": "2026-07-21",
         "honeypot": "",
     }
 

@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Manrope, Unbounded } from 'next/font/google'
-import { Metrika } from '@/components/site/metrika'
+import { ConsentProvider } from '@/components/site/consent-provider'
 import { SITE_URL } from '@/lib/site'
 import './globals.css'
 
@@ -64,8 +64,7 @@ export default function RootLayout({
   return (
     <html lang="ru" className={`dark ${manrope.variable} ${unbounded.variable}`}>
       <body className="bg-background font-sans antialiased">
-        {children}
-        <Metrika />
+        <ConsentProvider>{children}</ConsentProvider>
       </body>
     </html>
   )

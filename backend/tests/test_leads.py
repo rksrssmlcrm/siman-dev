@@ -46,6 +46,13 @@ async def test_honeypot_marks_spam_without_notification(
 
 
 @pytest.mark.asyncio
+async def test_create_lead_missing_consent_version(client, valid_payload):
+    del valid_payload["consent_text_version"]
+    response = await client.post("/api/leads", json=valid_payload)
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_rate_limit(client, valid_payload):
     statuses = []
     for _ in range(6):

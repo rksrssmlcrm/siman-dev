@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, String, Text, Uuid, func
+from sqlalchemy import Boolean, DateTime, String, Text, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.constants import LeadStatus
@@ -27,3 +27,10 @@ class Lead(Base):
         nullable=False,
     )
     user_agent_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    consent_given: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    consent_text_version: Mapped[str] = mapped_column(String(32), nullable=False)
+    consent_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )

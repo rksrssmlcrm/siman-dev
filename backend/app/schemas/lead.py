@@ -16,6 +16,7 @@ class LeadCreateRequest(BaseModel):
     phone: str
     message: str | None = Field(default=None, max_length=1000)
     consent: bool
+    consent_text_version: str = Field(min_length=1, max_length=32)
     honeypot: str | None = None
 
     @field_validator("phone")

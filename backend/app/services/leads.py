@@ -1,4 +1,5 @@
 import smtplib
+from datetime import UTC, datetime
 from email.message import EmailMessage
 
 import httpx
@@ -22,7 +23,9 @@ async def create_lead(
     source_page: str | None,
     user_agent_hash: str | None,
     is_spam: bool,
+    consent_text_version: str,
 ) -> Lead:
+    now = datetime.now(UTC)
     lead = Lead(
         name=payload_name,
         phone=payload_phone,
@@ -30,6 +33,9 @@ async def create_lead(
         source_page=source_page,
         user_agent_hash=user_agent_hash,
         status=LeadStatus.SPAM.value if is_spam else LeadStatus.NEW.value,
+        consent_given=True,
+        consent_text_version=consent_text_version,
+        consent_at=now,
     )
     session.add(lead)
     await session.commit()

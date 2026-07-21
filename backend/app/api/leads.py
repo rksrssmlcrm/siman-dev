@@ -58,6 +58,7 @@ async def create_lead_endpoint(
         source_page=source_page,
         user_agent_hash=user_agent_hash,
         is_spam=is_spam,
+        consent_text_version=payload.consent_text_version,
     )
 
     logger.info(

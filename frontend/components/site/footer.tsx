@@ -1,4 +1,5 @@
 import { Logo } from '@/components/site/logo'
+import { CookieSettingsButton } from '@/components/site/cookie-settings-button'
 import { CONTACTS, FOOTER, NAV_ITEMS } from '@/lib/content'
 
 export function Footer() {
@@ -12,6 +13,9 @@ export function Footer() {
             <Logo />
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
               {FOOTER.description}
+            </p>
+            <p className="max-w-xs text-xs leading-relaxed text-muted-foreground/80">
+              {FOOTER.legalLine}
             </p>
           </div>
 
@@ -60,12 +64,15 @@ export function Footer() {
           <p>
             © {year} {CONTACTS.brand}. {FOOTER.rights}
           </p>
-          <a
-            href="/privacy"
-            className="transition-colors hover:text-foreground"
-          >
-            {FOOTER.privacyLink}
-          </a>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <a href="/privacy" className="transition-colors hover:text-foreground">
+              {FOOTER.privacyLink}
+            </a>
+            <a href="/cookies" className="transition-colors hover:text-foreground">
+              {FOOTER.cookiesLink}
+            </a>
+            <CookieSettingsButton />
+          </div>
         </div>
       </div>
     </footer>
