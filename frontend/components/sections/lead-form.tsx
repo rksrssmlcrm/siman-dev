@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { FORM } from '@/lib/content'
+import { CONTACTS, FORM } from '@/lib/content'
+import { trackGoal } from '@/lib/analytics'
 import {
   formatRuPhone,
   leadFormSchema,
@@ -17,7 +18,36 @@ import {
   type LeadFormValues,
 } from '@/lib/validation/lead'
 
-type Status = 'idle' | 'loading' | 'success' | 'error'
+type Status = 'idle' | 'loading' | 'success' | 'rate_limited' | 'server_error' | 'error'
+
+/** RFC 9457 validation error item returned by the backend on 422. */
+type ApiFieldError = { field: string; message: string }
+
+async function submitLead(values: LeadFormValues): Promise<{
+  ok: boolean
+  status: number
+  fieldErrors: ApiFieldError[]
+}> {
+  const res = await fetch('/api/leads', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(toLeadPayload(values)),
+  })
+
+  if (res.ok) return { ok: true, status: res.status, fieldErrors: [] }
+
+  let fieldErrors: ApiFieldError[] = []
+  try {
+    const body = await res.json()
+    if (res.status === 422 && Array.isArray(body?.errors)) {
+      fieldErrors = body.errors
+    }
+  } catch {
+    // ignore parse failure — treated as generic error below
+  }
+
+  return { ok: false, status: res.status, fieldErrors }
+}
 
 export function LeadForm() {
   const [status, setStatus] = useState<Status>('idle')
@@ -27,6 +57,7 @@ export function LeadForm() {
     handleSubmit,
     control,
     reset,
+    setError,
     formState: { errors },
   } = useForm<LeadFormValues>({
     resolver: zodResolver(leadFormSchema),
@@ -36,18 +67,34 @@ export function LeadForm() {
   const onSubmit = async (values: LeadFormValues) => {
     if (status === 'loading') return
     setStatus('loading')
-    try {
-      const res = await fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(toLeadPayload(values)),
-      })
-      if (!res.ok) throw new Error(`Request failed with status ${res.status}`)
+
+    const { ok, status: httpStatus, fieldErrors } = await submitLead(values)
+
+    if (ok) {
       setStatus('success')
       reset()
-    } catch {
-      setStatus('error')
+      trackGoal('lead_submit')
+      return
     }
+
+    if (httpStatus === 429) {
+      setStatus('rate_limited')
+      return
+    }
+
+    // Set backend field validation errors into the form
+    if (httpStatus === 422 && fieldErrors.length > 0) {
+      for (const fe of fieldErrors) {
+        const field = fe.field as keyof LeadFormValues
+        if (field === 'name' || field === 'phone' || field === 'message' || field === 'consent') {
+          setError(field, { message: fe.message })
+        }
+      }
+      setStatus('idle')
+      return
+    }
+
+    setStatus(httpStatus >= 500 ? 'server_error' : 'error')
   }
 
   if (status === 'success') {
@@ -72,6 +119,15 @@ export function LeadForm() {
       </div>
     )
   }
+
+  const errorMessage =
+    status === 'rate_limited'
+      ? FORM.errorRateLimit
+      : status === 'server_error'
+        ? FORM.errorServer
+        : status === 'error'
+          ? FORM.errorGeneric
+          : null
 
   return (
     <form
@@ -142,7 +198,7 @@ export function LeadForm() {
         ) : null}
       </div>
 
-      {/* Honeypot field — hidden from users */}
+      {/* Honeypot — hidden from real users */}
       <div className="absolute -left-[9999px]" aria-hidden>
         <label htmlFor="lead-honeypot">{FORM.labels.honeypot}</label>
         <input
@@ -188,14 +244,29 @@ export function LeadForm() {
         ) : null}
       </div>
 
-      {status === 'error' ? (
-        <p
-          className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+      {errorMessage ? (
+        <div
+          className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
           role="alert"
         >
-          <AlertCircle className="size-4 shrink-0" aria-hidden />
-          {FORM.error}
-        </p>
+          <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span>
+            {errorMessage}
+            {(status === 'server_error' || status === 'error') ? (
+              <>
+                {' '}
+                <a
+                  href={CONTACTS.telegramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-4"
+                >
+                  {CONTACTS.telegram}
+                </a>
+              </>
+            ) : null}
+          </span>
+        </div>
       ) : null}
 
       <Button

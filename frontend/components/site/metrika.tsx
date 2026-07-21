@@ -2,7 +2,19 @@ import Script from 'next/script'
 
 const METRIKA_ID = process.env.NEXT_PUBLIC_METRIKA_ID
 
-/** Yandex Metrika counter; renders nothing when NEXT_PUBLIC_METRIKA_ID is not set. */
+/**
+ * Yandex Metrika counter.
+ * Renders nothing when NEXT_PUBLIC_METRIKA_ID is not set.
+ *
+ * Analytics & consent:
+ * The script currently loads with strategy="afterInteractive" without waiting
+ * for explicit cookie consent. This is a temporary state — in step 12 (cookie
+ * banner) the init call must be moved inside an `onConsentGranted` callback
+ * so tracking only starts after the user accepts.
+ *
+ * TODO(step-12): wrap `ym(id, 'init', ...)` in onConsentGranted().
+ * See docs/ARCHITECTURE.md — "Cookie consent & analytics".
+ */
 export function Metrika() {
   if (!METRIKA_ID) return null
 
