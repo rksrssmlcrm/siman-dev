@@ -2,6 +2,7 @@
 # Environment variables (from deploy/.env):
 #   STAGING_DOMAIN  — public domain, e.g. simandev.ru
 #   ACME_EMAIL      — email for Let's Encrypt certificate notifications
+#   STAGING         — set to 1 to add X-Robots-Tag: noindex (hide from search engines)
 
 {
 	email {$ACME_EMAIL}
@@ -19,6 +20,9 @@
 		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' mc.yandex.ru mc.yandex.com; connect-src 'self' mc.yandex.ru; img-src 'self' data: mc.yandex.ru; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 		-Server
 	}
+
+	@staging expression {env.STAGING} == "1"
+	header @staging X-Robots-Tag "noindex, nofollow"
 
 	handle /api/* {
 		reverse_proxy backend:8000

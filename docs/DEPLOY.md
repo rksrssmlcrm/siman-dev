@@ -261,3 +261,79 @@ docker compose exec backend alembic upgrade head
 # Очистка просроченных заявок
 docker compose exec backend simandev-retention
 ```
+
+---
+
+## 12. Staging / production деплой одной командой
+
+Скрипты в `deploy/` запускаются **с вашей машины** (Git Bash / WSL / Linux) и работают через SSH.
+
+| Скрипт | Когда | Что делает |
+|---|---|---|
+| `deploy/server-init.sh [host]` | один раз | Docker, каталог `/srv/simandev`, git clone, `.env` из шаблона, ufw/fail2ban |
+| `deploy/deploy.sh [host]` | каждое обновление | `git pull` → `docker compose build` → `up -d` → smoke-check |
+
+По умолчанию SSH-хост — **`simandev`** (alias из `~/.ssh/config`).  
+Подробная настройка SSH для Timeweb: [deploy/SSH-SETUP.md](../deploy/SSH-SETUP.md).
+
+### Первый деплой
+
+```bash
+chmod +x deploy/server-init.sh deploy/deploy.sh
+./deploy/server-init.sh simandev
+ssh simandev
+nano /srv/simandev/deploy/.env   # заполнить переменные
+exit
+./deploy/deploy.sh simandev
+```
+
+### Обновление (релиз)
+
+```bash
+./deploy/deploy.sh simandev
+```
+
+### Логи на сервере
+
+```bash
+ssh simandev
+cd /srv/simandev/deploy
+docker compose logs -f              # все сервисы
+docker compose logs -f backend      # API + миграции
+docker compose logs -f caddy        # TLS / прокси
+docker compose ps                   # статус healthchecks
+```
+
+### Staging: закрыть от индексации
+
+В `deploy/.env` на сервере:
+
+```env
+STAGING=1
+```
+
+Caddy добавит `X-Robots-Tag: noindex, nofollow`. Для публичного запуска поставь `STAGING=0` и передеплой.
+
+### Без домена (временно)
+
+Если `STAGING_DOMAIN` пуст или это IP — `deploy.sh` использует HTTP-only override на **:8080**.  
+После покупки домена обнови `.env` и запусти `deploy.sh` снова — включится HTTPS.
+
+---
+
+## 13. Проверка после деплоя
+
+```bash
+# Security-заголовки (с вашей машины)
+curl -sI https://simandev.ru/ | grep -iE 'strict|x-frame|x-content|referrer|permissions|robots'
+
+# Health API
+curl -s https://simandev.ru/api/health
+
+# Тестовая заявка
+curl -s -X POST https://simandev.ru/api/leads \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Тест","phone":"+79991234567","consent":true,"consent_text_version":"2026-07-21","honeypot":""}'
+```
+
+Проверь, что уведомление пришло в Telegram (или email, если настроен SMTP).
