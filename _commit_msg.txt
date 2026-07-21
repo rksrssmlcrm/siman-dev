@@ -1,9 +1,0 @@
-feat: docker deployment setup
-
-- Add multi-stage frontend/Dockerfile (node:22-alpine, pnpm standalone, non-root user)
-- Add multi-stage backend/Dockerfile (python:3.13-slim, uv, entrypoint with DB wait + alembic)
-- Add deploy/docker-compose.yml with caddy, frontend, backend, postgres (internal/web networks)
-- Add deploy/Caddyfile (TLS, security headers, CSP, gzip/zstd, static cache)
-- Add deploy/docker-compose.local.yml for HTTP smoke test on :8080
-- Add deploy/.env.production.example and docs/DEPLOY.md
-- Enable output: standalone in next.config.ts; add frontend/.npmrc for Docker builds
