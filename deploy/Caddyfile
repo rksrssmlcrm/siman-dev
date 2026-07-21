@@ -17,7 +17,7 @@
 		Referrer-Policy "strict-origin-when-cross-origin"
 		X-Frame-Options "DENY"
 		Permissions-Policy "camera=(), microphone=(), geolocation=()"
-		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' mc.yandex.ru mc.yandex.com; connect-src 'self' mc.yandex.ru mc.yandex.com; img-src 'self' data: blob: mc.yandex.ru; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' mc.yandex.ru mc.yandex.com; connect-src 'self' mc.yandex.ru mc.yandex.com; img-src 'self' data: blob: mc.yandex.ru; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-src mc.yandex.ru; child-src mc.yandex.ru; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 		-Server
 	}
 
